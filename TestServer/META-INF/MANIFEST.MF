@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: TestServer
+Bundle-SymbolicName: TestServer
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: testserver.Activator
+Import-Package: ch.ethz.iks.r_osgi,
+ ch.ethz.iks.slp,
+ org.osgi.framework;version="1.3.0",
+ testservice
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.0
+Export-Package: testserviceimpl
