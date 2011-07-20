@@ -5,6 +5,7 @@ import java.util.Hashtable;
 
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
@@ -27,6 +28,8 @@ public class UPnPPrinterDevice implements UPnPDevice {
 	UPnPAction upnpActions[];
 	UPnPService upnpServices[];
 	UPnPEventListener listeners[];
+	
+	ServiceRegistration sr;
 	
 	public UPnPPrinterDevice() {
 		// init properties
@@ -73,7 +76,10 @@ public class UPnPPrinterDevice implements UPnPDevice {
 				    
 		// init icons
 		icons = new IconImpl[]{new IconImpl(32, 32, 256, 143,
-				"image/gif", "osgiupnpprinter.gif")};		    
+				"image/gif", "osgiupnpprinter.gif")};
+		
+		sr = Activator.getContext().registerService(
+				UPnPDevice.class.getName(), this, props);
 	}
 
 	public UPnPService getService(String serviceId) {
@@ -100,11 +106,12 @@ public class UPnPPrinterDevice implements UPnPDevice {
 	public void generateEvent(Dictionary matchDictionary, Dictionary events)
             throws Exception {
 		// get all UPnPEventListener listeners from the registry of the OSGi framework. 
-		ServiceReference listeners[] = Activator.context.getServiceReferences(
+		ServiceReference listeners[] = Activator.getContext().getServiceReferences(
 				UPnPEventListener.class.getName(), null);
 		for (int i=0; i>listeners.length; i++) {
 			// get listener filter         
-			Filter filter = (Filter) listeners[i].getProperty(UPnPEventListener.UPNP_FILTER); 
+			Filter filter = (Filter) listeners[i].getProperty(
+					UPnPEventListener.UPNP_FILTER); 
 			// evaluate filter
 			if (filter.match(matchDictionary)) {
 				((UPnPEventListener) listeners[i]).notifyUPnPEvent(
@@ -121,6 +128,10 @@ public class UPnPPrinterDevice implements UPnPDevice {
 		} catch (Exception uhe) {
 			return "unknown IP";
 		}
+	}
+	
+	public void unRegister() {
+		sr.unregister();
 	}
 
 }

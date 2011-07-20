@@ -1,16 +1,12 @@
 package upnpdevicetest;
 
-import java.util.Hashtable;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.upnp.UPnPDevice;
 
 public class Activator implements BundleActivator {
 
-	static BundleContext context;
-	private ServiceRegistration sr;
+	private static BundleContext context;
+	UPnPPrinterDevice dev;
 
 	static BundleContext getContext() {
 		return context;
@@ -22,12 +18,8 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
-		Hashtable properties = new Hashtable();
-		properties.put(UPnPDevice.UPNP_EXPORT, Boolean.TRUE);
-		sr = context.registerService(
-				UPnPDevice.class.getName(),
-				new UPnPPrinterDevice(),
-				properties);
+		dev = new UPnPPrinterDevice();
+		
 		System.out.println("UPnP PrintDevice registered");
 	}
 
@@ -37,7 +29,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
-		sr.unregister();
+		dev.unRegister();
 	}
 
 }

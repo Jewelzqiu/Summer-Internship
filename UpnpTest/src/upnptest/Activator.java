@@ -34,7 +34,7 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 		Activator.context = bundleContext;
 		ServiceReference[] dvs = bundleContext.getServiceReferences(
 				UPnPDevice.class.getName(),
-				"(ObjectClass = " + UPnPDevice.class.getName() + ")");
+				"(ObjectClass=" + UPnPDevice.class.getName() + ")");
 		
 		if (dvs == null) {
 			System.out.println("No UPnP device found");
@@ -46,8 +46,17 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			}
 		}
 		
+		ServiceReference src = bundleContext.getServiceReference(
+				UPnPDevice.class.getName());
+		if (src == null) {
+			System.out.println("Cannot find UPnPDevice");
+		} else {
+			System.out.println("UPnPDevice: " + src.getProperty(UPnPDevice.UDN));
+		}
+		
+		
 		bundleContext.addServiceListener(this, 
-				"(ObjectClass = " + UPnPDevice.class.getName() + ")");
+				"(ObjectClass=" + UPnPDevice.class.getName() + ")");
 		
 		Hashtable tmp = new Hashtable();
 		Filter fi = null;
