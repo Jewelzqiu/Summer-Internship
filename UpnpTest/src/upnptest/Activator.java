@@ -11,6 +11,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
 import org.osgi.service.upnp.UPnPService;
@@ -38,22 +39,17 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 		
 		if (dvs == null) {
 			System.out.println("No UPnP device found");
-		}
-		
-		if (dvs != null) {
+		} else {
 			for (int i = 0; i < dvs.length; i++) {
 				System.out.println("Device: " + dvs[i].getProperty(UPnPDevice.UDN));
+				UPnPDevice dev = (UPnPDevice) context.getService(dvs[i]);
+				UPnPService[] services = dev.getServices();
+				UPnPAction action = services[0].getActions()[0];
+				Hashtable prop = new Hashtable();
+				prop.put(action.getInputArgumentNames()[0], "test");
+				action.invoke(prop);
 			}
-		}
-		
-		ServiceReference src = bundleContext.getServiceReference(
-				UPnPDevice.class.getName());
-		if (src == null) {
-			System.out.println("Cannot find UPnPDevice");
-		} else {
-			System.out.println("UPnPDevice: " + src.getProperty(UPnPDevice.UDN));
-		}
-		
+		}	
 		
 		bundleContext.addServiceListener(this, 
 				"(ObjectClass=" + UPnPDevice.class.getName() + ")");
