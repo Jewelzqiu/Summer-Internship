@@ -1,8 +1,16 @@
 package upnptest;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -22,6 +30,12 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 	private ServiceRegistration srr;
 	private static String filter = "(|(" + UPnPDevice.UDN + "=*)(" 
             + UPnPService.ID + "=*))";
+	public Vector devices = new Vector();
+	
+	private ServerSocket ss;
+	private Socket socket;
+	private BufferedReader in;
+	ObjectOutputStream out;
 
 	static BundleContext getContext() {
 		return context;
@@ -33,6 +47,7 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
+		//update();
 		ServiceReference[] dvs = bundleContext.getServiceReferences(
 				UPnPDevice.class.getName(),
 				"(ObjectClass=" + UPnPDevice.class.getName() + ")");
@@ -41,13 +56,34 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			System.out.println("No UPnP device found");
 		} else {
 			for (int i = 0; i < dvs.length; i++) {
+				Hashtable info = new Hashtable();
+				String[] keys = dvs[i].getPropertyKeys();
+				for (int j = 0; j < keys.length; j++) {
+					info.put(keys[j], dvs[i].getProperty(keys[j]));
+				}
 				System.out.println("Device: " + dvs[i].getProperty(UPnPDevice.UDN));
 				UPnPDevice dev = (UPnPDevice) context.getService(dvs[i]);
 				UPnPService[] services = dev.getServices();
-				UPnPAction action = services[0].getActions()[0];
-				Hashtable prop = new Hashtable();
-				prop.put(action.getInputArgumentNames()[0], "test");
-				action.invoke(prop);
+				Hashtable svs = new Hashtable(services.length);
+				for (int j = 0; j < services.length; j++) {
+					UPnPAction[] actions = services[j].getActions();
+					ArrayList acns = new ArrayList(actions.length);
+					for (int k = 0; k < actions.length; k++) {
+						ArrayList parameters = new ArrayList(3);
+						parameters.add(actions[k].getName());
+						//parameters.add(actions[k].getReturnArgumentName());
+						parameters.add(actions[k].getInputArgumentNames());
+						parameters.add(actions[k].getOutputArgumentNames());
+						acns.add(parameters);
+					}
+					svs.put(services[j].getId(), acns);
+				}
+				info.put("Device Services", svs);
+				devices.add(info);
+//				UPnPAction action = services[0].getActions()[0];
+//				Hashtable prop = new Hashtable();
+//				prop.put(action.getInputArgumentNames()[0], "test");
+//				action.invoke(prop);
 			}
 		}	
 		
@@ -63,7 +99,10 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 		}
 		tmp.put(UPNP_FILTER, fi);
 		srr = bundleContext.registerService(
-				UPnPEventListener.class.getName(), this, null);		
+				UPnPEventListener.class.getName(), this, null);	
+		
+		ss = new ServerSocket(22222);
+		thread.start();
 	}
 
 	/*
@@ -72,7 +111,13 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
-		srr.unregister();
+		if (srr != null) {
+			srr.unregister();
+		}
+		thread.interrupt();
+		if (ss != null) {
+			ss.close();
+		}
 	}
 
 	public void notifyUPnPEvent(String deviceId, String serviceId, Dictionary events) {
@@ -96,18 +141,105 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			System.out.println(
 					"UNREGISTERING: " + 
 					event.getServiceReference().getProperty(UPnPDevice.UDN));
+			try {
+				update();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else if (event.getType() == ServiceEvent.REGISTERED) {
 			System.out.println(
 					"REGISTERED: " + 
 					event.getServiceReference().getProperty(UPnPDevice.UDN));
+			try {
+				update();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else if (event.getType() == ServiceEvent.MODIFIED) {
 			System.out.println(
 					"MODIFIED: " + 
 					event.getServiceReference().getProperty(UPnPDevice.UDN));
+			try {
+				update();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 	}
+	
+	private void update() throws Exception {
+		ServiceReference[] dvs = context.getServiceReferences(
+				UPnPDevice.class.getName(),
+				"(ObjectClass=" + UPnPDevice.class.getName() + ")");
+		devices.clear();
+		
+		if (dvs == null) {
+			System.out.println("No UPnP device found");
+		} else {
+			for (int i = 0; i < dvs.length; i++) {
+				Hashtable info = new Hashtable();
+				String[] keys = dvs[i].getPropertyKeys();
+				for (int j = 0; j < keys.length; j++) {
+					info.put(keys[j], dvs[i].getProperty(keys[j]));
+				}
+				UPnPDevice dev = (UPnPDevice) context.getService(dvs[i]);
+				UPnPService[] services = dev.getServices();
+				Hashtable svs = new Hashtable(services.length);
+				for (int j = 0; j < services.length; j++) {
+					UPnPAction[] actions = services[j].getActions();
+					ArrayList acns = new ArrayList(actions.length);
+					for (int k = 0; k < actions.length; k++) {
+						ArrayList parameters = new ArrayList(3);
+						parameters.add(actions[k].getName());
+						//parameters.add(actions[k].getReturnArgumentName());
+						parameters.add(actions[k].getInputArgumentNames());
+						parameters.add(actions[k].getOutputArgumentNames());
+						acns.add(parameters);
+					}
+					svs.put(services[j].getId(), acns);
+				}
+				info.put("Device Services", svs);
+				devices.add(info);
+			}
+		}	
+	}
+	
+	Thread thread = new Thread() {
+		
+		public void run() {
+			try {
+				while (true) {
+					socket = ss.accept();
+					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					String s = in.readLine();
+					if (s != null && s.equals("query")) {
+						out = new ObjectOutputStream(socket.getOutputStream());
+						if (devices == null) {
+							System.out.println("devices == null");
+						} else {
+							out.writeObject(devices);
+							out.flush();
+							//sleep(5000);
+							out.close();
+						}
+					}
+					in.close();
+					socket.close();
+				}
+			} catch(SocketException e) {
+				//e.printStackTrace();
+				this.interrupt();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+	};
 
 }
