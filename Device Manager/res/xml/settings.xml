@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Network settings">
+        <EditTextPreference android:key="IPText" android:title="IP address"></EditTextPreference>
+        <EditTextPreference android:key="PortText" android:title="Port number" android:inputType="number"></EditTextPreference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Start">
+        <Preference android:title="Show Devices" android:key="StartPreference"></Preference>
+    </PreferenceCategory>
+    
+</PreferenceScreen>

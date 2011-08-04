@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:key="input" android:title="Input arguments"></PreferenceCategory>
+    <PreferenceCategory android:key="output" android:title="Output arguments"></PreferenceCategory>
+    
+</PreferenceScreen>
