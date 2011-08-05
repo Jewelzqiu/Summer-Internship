@@ -1,18 +1,15 @@
 package com.jewelz.devicemanager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.SimpleAdapter;
 
-public class DeviceInfoActivity extends ListActivity {
+public class DeviceInfoActivity extends PreferenceActivity {
 
 	private Hashtable<String, Object> DeviceInfo;
 	static Hashtable<String, ArrayList<Object>> Services;
@@ -20,14 +17,9 @@ public class DeviceInfoActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.deviceinfo);
 		DeviceInfo = DevicesActivity.getDeviceInfo();
-		SimpleAdapter adapter = new SimpleAdapter(
-				this,
-				getData(),
-				R.layout.item,
-				new String[]{"title", "summary"},
-				new int[]{R.id.title, R.id.summary});
-		setListAdapter(adapter);
+		addDeviceInfo();
 	}
 
 	@Override
@@ -47,10 +39,7 @@ public class DeviceInfoActivity extends ListActivity {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<Map<String, Object>> getData() {
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();		
-		Map<String, Object> map;
-		
+	private void addDeviceInfo() {		
 		for (String key : DeviceInfo.keySet()) {
 			if (key.equals("Device Services")) {
 				Services = (Hashtable<String, ArrayList<Object>>)
@@ -58,13 +47,11 @@ public class DeviceInfoActivity extends ListActivity {
 				continue;
 			}
 			
-			map = new HashMap<String, Object>();
-			map.put("title", key);
-			map.put("summary", DeviceInfo.get(key));
-			list.add(map);
+			Preference item = new Preference(this);
+			item.setTitle(key);
+			item.setSummary(DeviceInfo.get(key).toString());
+			getPreferenceScreen().addPreference(item);
 		}
-
-        return list;
 	}
 	
 }

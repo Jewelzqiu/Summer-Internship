@@ -29,6 +29,10 @@ public final class R {
     }
     public static final class xml {
         public static final int action=0x7f040000;
-        public static final int settings=0x7f040001;
+        public static final int actions=0x7f040001;
+        public static final int deviceinfo=0x7f040002;
+        public static final int devices=0x7f040003;
+        public static final int services=0x7f040004;
+        public static final int settings=0x7f040005;
     }
 }

@@ -1,57 +1,41 @@
 package com.jewelz.devicemanager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceActivity;
 
-public class ActionsActivity extends ListActivity {
+public class ActionsActivity extends PreferenceActivity {
 	
 	private static ArrayList<Object> Actions;
 	private static int action_id = -1;
-	
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		action_id = position;
-		Intent intent = new Intent(ActionsActivity.this, ActionInfoActivity.class);
-		startActivity(intent);
-		super.onListItemClick(l, v, position, id);
-	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.actions);
 		Actions = ServicesActivity.getActions();
-		SimpleAdapter adapter = new SimpleAdapter(
-				this,
-				getData(),
-				R.layout.devices,
-				new String[]{"name"},
-				new int[]{R.id.device_name});
-		setListAdapter(adapter);
+		addActions();
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<Map<String, Object>> getData() {
-		
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();		
-		Map<String, Object> map;
-		
-		for (Object o : Actions) {
-			map = new HashMap<String, Object>();
-			ArrayList<Object> action = (ArrayList<Object>) o;
-			map.put("name", action.get(0));
-			list.add(map);
+	private void addActions() {
+		if (Actions == null) {
+			return;
 		}
 		
+		int flag = 0;		
+		for (Object o : Actions) {
+			ArrayList<Object> action = (ArrayList<Object>) o;
+			Preference item = new Preference(this);
+			item.setTitle(action.get(0).toString());
+			item.setKey(flag++ + "");
+			item.setOnPreferenceClickListener(new OnActionClickListener());
+			getPreferenceScreen().addPreference(item);
+		}		
 		action_id = -1;
-        return list;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -60,6 +44,18 @@ public class ActionsActivity extends ListActivity {
 			return (ArrayList<Object>) Actions.get(action_id);
 		}
 		return null;
+	}
+	
+	private class OnActionClickListener implements OnPreferenceClickListener {
+
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			action_id = new Integer(preference.getKey());
+			Intent intent = new Intent(ActionsActivity.this, ActionInfoActivity.class);
+			startActivity(intent);
+			return false;
+		}
+		
 	}
 
 }

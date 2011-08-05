@@ -1,40 +1,23 @@
 package com.jewelz.devicemanager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceActivity;
 
-public class ServicesActivity extends ListActivity {
+public class ServicesActivity extends PreferenceActivity {
 
 	private static ArrayList<ArrayList<Object>> Services;
 	private static int service_id = -1;
 	
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		service_id = position;
-		Intent intent = new Intent(ServicesActivity.this, ActionsActivity.class);
-		startActivity(intent);
-		super.onListItemClick(l, v, position, id);
-	}
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.services);
 		Services = new ArrayList<ArrayList<Object>>();
-		SimpleAdapter adapter = new SimpleAdapter(
-				this,
-				getData(),
-				R.layout.devices,
-				new String[]{"name"},
-				new int[]{R.id.device_name});
-		setListAdapter(adapter);
+		addServices();
 	}
 	
 	public static ArrayList<Object> getActions() {
@@ -44,20 +27,33 @@ public class ServicesActivity extends ListActivity {
 		return null;
 	}
 	
-	private List<Map<String, Object>> getData() {
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();		
-		Map<String, Object> map;
+	private void addServices() {
+		if (DeviceInfoActivity.Services == null) {
+			return;
+		}
 		
 		for (String key : DeviceInfoActivity.Services.keySet()) {
-			map = new HashMap<String, Object>();
 			ArrayList<Object> service = DeviceInfoActivity.Services.get(key);
-			map.put("name", key);
-			list.add(map);
+			Preference item = new Preference(this);
+			item.setTitle(key);
+			item.setKey(ServicesActivity.Services.size() + "");
+			item.setOnPreferenceClickListener(new OnServiceClickListener());
+			getPreferenceScreen().addPreference(item);
 			
 			ServicesActivity.Services.add(service);
 		}
-
 		service_id = -1;
-        return list;
+	}
+	
+	private class OnServiceClickListener implements OnPreferenceClickListener {
+
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			service_id = new Integer(preference.getKey());
+			Intent intent = new Intent(ServicesActivity.this, ActionsActivity.class);
+			startActivity(intent);
+			return false;
+		}
+		
 	}
 }

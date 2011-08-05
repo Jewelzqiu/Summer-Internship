@@ -25,7 +25,6 @@ public class MainActivity
 	private EditTextPreference PortText;
 	private Preference start;
 	
-	@SuppressWarnings("null")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,7 +66,7 @@ public class MainActivity
 		}
 		if (key.equals("PortText")) {
 			String Port = PortText.getText();
-			if (Port.equals("")) {
+			if (Port == null || Port.equals("")) {
 				port = 0;
 			} else {
 				port = new Integer(Port);
@@ -79,7 +78,7 @@ public class MainActivity
 	private class startListener implements OnPreferenceClickListener {
 		@Override
 		public boolean onPreferenceClick(Preference preference) {
-			if (IP.equals("") || port == 0) {
+			if (IP == null || IP.equals("") || port == 0) {
 				new AlertDialog.Builder(MainActivity.this)
 				.setTitle("Warning")
 				.setMessage("Please set the valid IP address and the port number first.")
@@ -98,7 +97,7 @@ public class MainActivity
 			ConnectivityManager cm = (ConnectivityManager) 
 					getSystemService(Context.CONNECTIVITY_SERVICE);
 			NetworkInfo netinfo = cm.getActiveNetworkInfo();
-			if (!netinfo.isConnected()) {
+			if (netinfo == null || !netinfo.isConnected()) {
 				new AlertDialog.Builder(MainActivity.this)
 				.setTitle("Warning")
 				.setMessage("Please check the network connection state.")

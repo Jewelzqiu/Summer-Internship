@@ -4,22 +4,18 @@ import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
-public class DevicesActivity extends ListActivity {
+public class DevicesActivity extends PreferenceActivity {
 	
 	private Socket socket;
 	private ObjectInputStream in;
@@ -30,43 +26,33 @@ public class DevicesActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SimpleAdapter adapter = new SimpleAdapter(
-				this,
-				getData(),
-				R.layout.devices,
-				new String[]{"name"},
-				new int[]{R.id.device_name});
-		setListAdapter(adapter);		
+		addPreferencesFromResource(R.xml.devices);
+		
+		addDevices();
 	}
 	
-	private List<Map<String, Object>> getData() {
+	private void addDevices() {
 		Vector<Hashtable<String, Object>> devices = null;
 		try {
-			 devices = getDevicesInfo();
+			devices = getDevicesInfo();
+			Devices = new ArrayList<Hashtable<String, Object>>();
+			
+			if (devices != null) {
+				for (Hashtable<String, Object> device : devices) {
+					Preference deviceitem = new Preference(this);
+					deviceitem.setTitle((CharSequence) device.get("UPnP.device.modelName"));
+					deviceitem.setKey(Devices.size() + "");
+					deviceitem.setOnPreferenceClickListener(new OnDeviceClickListener());
+					getPreferenceScreen().addPreference(deviceitem);
+					Devices.add(device);
+				}
+			}	
+			device_id = -1;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		Devices = new ArrayList<Hashtable<String, Object>>();
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();		
-		Map<String, Object> map = new HashMap<String, Object>();
 		
-		for (Hashtable<String, Object> device : devices) {
-			map.put("name", device.get("UPnP.device.modelName"));
-			list.add(map);
-			Devices.add(device);
-		}
-		
-//		map = new HashMap<String, Object>();
-//		map.put("name", "device1");
-//        list.add(map);
-//        
-//        map = new HashMap<String, Object>();
-//		map.put("name", "device2");
-//        list.add(map);
-
-		device_id = -1;
-        return list;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -83,14 +69,6 @@ public class DevicesActivity extends ListActivity {
 	}
 
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		device_id = position;
-		Intent intent = new Intent(DevicesActivity.this, DeviceInfoActivity.class);
-		startActivity(intent);
-		super.onListItemClick(l, v, position, id);
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, 0, 0, "Refresh");
 		return true;
@@ -100,13 +78,8 @@ public class DevicesActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == 0) {
-			SimpleAdapter adapter = new SimpleAdapter(
-					this,
-					getData(),
-					R.layout.devices,
-					new String[]{"name"},
-					new int[]{R.id.device_name});
-			setListAdapter(adapter);
+			this.getPreferenceScreen().removeAll();
+			addDevices();
 		}
 		return true;
 	}
@@ -116,6 +89,18 @@ public class DevicesActivity extends ListActivity {
 			return Devices.get(device_id);
 		}
 		return null;
+	}
+	
+	private class OnDeviceClickListener implements OnPreferenceClickListener {
+
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			device_id = new Integer(preference.getKey());
+			Intent intent = new Intent(DevicesActivity.this, DeviceInfoActivity.class);
+			startActivity(intent);
+			return false;
+		}
+		
 	}
 	
 }
