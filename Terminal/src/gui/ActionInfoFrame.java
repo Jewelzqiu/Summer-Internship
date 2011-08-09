@@ -1,6 +1,4 @@
 package gui;
-import java.util.ArrayList;
-
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -9,6 +7,8 @@ import javax.swing.JSeparator;
 import javax.swing.ListModel;
 
 import javax.swing.WindowConstants;
+
+import device.Action;
 
 
 /**
@@ -39,15 +39,15 @@ public class ActionInfoFrame extends javax.swing.JFrame {
 	* Auto-generated main method to display this JFrame
 	*/
 		
-	public ActionInfoFrame(ArrayList<Object> Action) {
+	public ActionInfoFrame(Action action) {
 		super();
-		initGUI(Action);
+		initGUI(action);
 	}
 	
-	private void initGUI(ArrayList<Object> Action) {
+	private void initGUI(Action action) {
 		try {
 			setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			setTitle(Action.get(0).toString());
+			setTitle(action.getName());
 			setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 			{
 				InputLabel = new JLabel();
@@ -55,7 +55,7 @@ public class ActionInfoFrame extends javax.swing.JFrame {
 				InputLabel.setText("Input arguments      ");
 			}
 			{
-				String[] inputs = (String[]) Action.get(1);
+				String[] inputs = action.getInputs();
 				if (inputs != null) {
 					ListModel InputListModel = 
 							new DefaultComboBoxModel(inputs);
@@ -74,7 +74,7 @@ public class ActionInfoFrame extends javax.swing.JFrame {
 				OutputLabel.setText("Output arguments      ");
 			}
 			{
-				String[] outputs = (String[]) Action.get(2);
+				String[] outputs = action.getOutputs();
 				if (outputs != null) {
 					ListModel OutputListModel = 
 							new DefaultComboBoxModel(outputs);
@@ -84,10 +84,9 @@ public class ActionInfoFrame extends javax.swing.JFrame {
 				}
 			}
 			pack();
-			//setSize(400, 300);
+			setLocationRelativeTo(null);
 			setVisible(false);
 		} catch (Exception e) {
-		    //add your error handling code here
 			e.printStackTrace();
 		}
 	}

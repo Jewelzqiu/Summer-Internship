@@ -28,9 +28,7 @@ import javax.swing.WindowConstants;
 * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
 */
 public class SettingsFrame extends javax.swing.JFrame {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private JPanel IPPanel;
 	private JButton CancelButton;
@@ -42,10 +40,6 @@ public class SettingsFrame extends javax.swing.JFrame {
 	private JTextField IPText;
 	private JTextField PortText;
 
-	/**
-	* Auto-generated main method to display this JFrame
-	*/
-		
 	public SettingsFrame(String IP, int port) {
 		super();
 		initGUI(IP, port);
@@ -70,7 +64,6 @@ public class SettingsFrame extends javax.swing.JFrame {
 						IPText.setText(IP);
 					}
 					IPText.setEditable(true);
-					//IPText.setPreferredSize(new java.awt.Dimension(250, 100));
 					IPPanel.add(IPText);
 				}
 			}
@@ -85,7 +78,6 @@ public class SettingsFrame extends javax.swing.JFrame {
 				}
 				PortText.setEditable(true);
 				PortPanel.add(PortText);
-				//PortText.setPreferredSize(new java.awt.Dimension(250, 100));
 				getContentPane().add(PortPanel);
 			}
 			{
@@ -106,8 +98,8 @@ public class SettingsFrame extends javax.swing.JFrame {
 			}
 			pack();
 			setSize(220, 120);
+			setLocationRelativeTo(null);
 		} catch (Exception e) {
-		    //add your error handling code here
 			e.printStackTrace();
 		}
 	}
@@ -124,7 +116,6 @@ public class SettingsFrame extends javax.swing.JFrame {
 				out.close();
 				SettingsFrame.this.dispose();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

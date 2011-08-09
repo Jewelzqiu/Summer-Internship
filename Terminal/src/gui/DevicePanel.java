@@ -19,7 +19,7 @@ import javax.swing.JTable;
 * THIS MACHINE, SO JIGLOO OR THIS CODE CANNOT BE USED
 * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
 */
-public class TabPanel extends javax.swing.JPanel {
+public class DevicePanel extends javax.swing.JPanel {
 	/**
 	 * 
 	 */
@@ -32,26 +32,24 @@ public class TabPanel extends javax.swing.JPanel {
 	* JPanel inside a new JFrame.
 	*/
 		
-	public TabPanel(Hashtable<String, Object> info) {
+	public DevicePanel(Hashtable<String, Object> info) {
 		super();
 		initGUI(info);
 	}
 	
 	private void initGUI(Hashtable<String, Object> info) {
 		try {
-			setPreferredSize(new java.awt.Dimension(490, 340));
+			setPreferredSize(new java.awt.Dimension(400, 300));
 			{
 				InfoScrollPane = new JScrollPane();
 				this.add(InfoScrollPane);
-				InfoScrollPane.setPreferredSize(new java.awt.Dimension(490, 340));
+				InfoScrollPane.setPreferredSize(new java.awt.Dimension(400, 300));
 				int n = info.size();
-				String[][] data = new String[n - 1][2];
+				String[][] data = new String[n][2];
 				int flag = 0;
 				for (String key : info.keySet()) {
-					if (!key.equals("Device Services")) {
-						data[flag][0] = key;
-						data[flag++][1] = info.get(key).toString();
-					}
+					data[flag][0] = key;
+					data[flag++][1] = info.get(key).toString();
 				}
 				{
 					TableModel InfoTableModel = 
