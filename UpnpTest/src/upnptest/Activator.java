@@ -2,6 +2,7 @@ package upnptest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -58,6 +59,7 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			for (int i = 0; i < dvs.length; i++) {
 				Hashtable info = new Hashtable();
 				String[] keys = dvs[i].getPropertyKeys();
+				//System.out.println(Arrays.toString(keys));
 				for (int j = 0; j < keys.length; j++) {
 					info.put(keys[j], dvs[i].getProperty(keys[j]));
 				}
@@ -68,6 +70,7 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 				for (int j = 0; j < services.length; j++) {
 					UPnPAction[] actions = services[j].getActions();
 					ArrayList acns = new ArrayList(actions.length);
+					acns.add(services[j].getType());
 					for (int k = 0; k < actions.length; k++) {
 						ArrayList parameters = new ArrayList(3);
 						parameters.add(actions[k].getName());
@@ -115,9 +118,7 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			srr.unregister();
 		}
 		thread.interrupt();
-		if (ss != null) {
-			ss.close();
-		}
+		ss.close();
 	}
 
 	public void notifyUPnPEvent(String deviceId, String serviceId, Dictionary events) {
@@ -144,7 +145,6 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			try {
 				update();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -155,7 +155,6 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			try {
 				update();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -166,7 +165,6 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 			try {
 				update();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -218,22 +216,36 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 					socket = ss.accept();
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					String s = in.readLine();
-					if (s != null && s.equals("query")) {
-						out = new ObjectOutputStream(socket.getOutputStream());
-						if (devices == null) {
-							System.out.println("devices == null");
-						} else {
-							out.writeObject(devices);
+					if (s != null) {
+						if (s.equals("query")) {
+							out = new ObjectOutputStream(socket.getOutputStream());
+							if (devices == null) {
+								System.out.println("devices == null");
+							} else {
+								out.writeObject(devices);
+								out.flush();
+								out.close();
+							}
+						} else if (s.equals("invoke")) {
+							System.out.println("[Server]: invoke");
+							ObjectInputStream ois = 
+									new ObjectInputStream(socket.getInputStream());
+							System.out.println("[Server]: start reading");
+							Hashtable props = (Hashtable) ois.readObject();
+							System.out.println("[Server]: read complete");
+							out = new ObjectOutputStream(socket.getOutputStream());
+							out.writeObject(invoke(props));
 							out.flush();
-							//sleep(5000);
+							System.out.println("[Server]: write complete");
 							out.close();
+							ois.close();
 						}
 					}
 					in.close();
 					socket.close();
 				}
 			} catch(SocketException e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 				this.interrupt();
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -241,5 +253,31 @@ public class Activator implements BundleActivator, UPnPEventListener, ServiceLis
 		}
 		
 	};
+	
+	private Dictionary invoke(Hashtable props) throws Exception {
+		Dictionary dic = null;
+		String device_id = (String) props.get("DEVICE_ID");
+		String service_id = (String) props.get("SERVICE_ID");
+		String action_name = (String) props.get("ACTION_NAME");
+		if (device_id == null || service_id == null || action_name == null) {
+			return null;
+		}
+		Hashtable inputs = (Hashtable) props.get("ARGUMENTS");
+		
+		ServiceReference[] dvs = context.getServiceReferences(
+				UPnPDevice.class.getName(),
+				"(ObjectClass=" + UPnPDevice.class.getName() + ")");
+		if (dvs != null) {
+			for (int i = 0; i < dvs.length; i++) {
+				if (dvs[i].getProperty(UPnPDevice.UDN).toString().equals(device_id)) {
+					UPnPDevice dev = (UPnPDevice) context.getService(dvs[i]);
+					UPnPService service = dev.getService(service_id);
+					UPnPAction action = service.getAction(action_name);
+					dic = action.invoke(inputs);
+				}
+			}
+		}
+		return dic;
+	}
 
 }

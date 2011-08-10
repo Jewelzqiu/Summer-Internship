@@ -63,7 +63,7 @@ public class ServicePanel extends javax.swing.JPanel {
 					         int selRow = servicetree.getRowForLocation(e.getX(), e.getY());
 					         if(selRow > 0) {
 					        	 if(e.getClickCount() == 2) {
-					        		 new ActionInfoFrame(
+					        		 ActionInfoFrame.getActionInfoFrame(
 					        				 (Action) actions.get(selRow - 1))
 					        		 .setVisible(true);
 					             }

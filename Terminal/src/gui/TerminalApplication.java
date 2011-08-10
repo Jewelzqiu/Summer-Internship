@@ -23,7 +23,7 @@ import org.jdesktop.application.SingleFrameApplication;
 import device.Device;
 import device.Service;
 
-import terminal.Terminal;
+import util.Connection;
 
 
 /**
@@ -62,7 +62,7 @@ public class TerminalApplication extends SingleFrameApplication {
     		topPanel = new JPanel();
     		getMainFrame().getContentPane().add(topPanel, BorderLayout.NORTH);
     		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-    		topPanel.setPreferredSize(new java.awt.Dimension(500, 300));
+    		topPanel.setPreferredSize(new java.awt.Dimension(500, 320));
     		topPanel.add(getLeftPanel());
     		topPanel.add(getInfoTabbedPane());
     	}
@@ -93,7 +93,7 @@ public class TerminalApplication extends SingleFrameApplication {
     		LeftPanel.add(getRefreshButton());
     		LeftPanel.add(getServicesButton());
     		getButtonGroup();
-    		LeftPanel.setPreferredSize(new java.awt.Dimension(100, 300));
+    		LeftPanel.setPreferredSize(new java.awt.Dimension(100, 320));
     		LeftPanel.setLayout(null);
     	}
     	return LeftPanel;
@@ -122,7 +122,7 @@ public class TerminalApplication extends SingleFrameApplication {
     private JTabbedPane getInfoTabbedPane() {
     	if(InfoTabbedPane == null) {
     		InfoTabbedPane = new JTabbedPane();
-    		InfoTabbedPane.setPreferredSize(new java.awt.Dimension(400, 300));
+    		InfoTabbedPane.setPreferredSize(new java.awt.Dimension(400, 320));
     	}
     	return InfoTabbedPane;
     }
@@ -270,7 +270,7 @@ public class TerminalApplication extends SingleFrameApplication {
 				BufferedReader in = new BufferedReader(new FileReader("network.cfg"));
 				IP = in.readLine();
 				port = new Integer(in.readLine());
-				Vector<Hashtable<String, Object>> devices = Terminal.getDevicesInfo(IP, port);
+				Vector<Hashtable<String, Object>> devices = Connection.getDevicesInfo(IP, port);
 				Devices = new Vector<Device>();
 				Services = new Hashtable<String, Vector<Service>>();
 				if (devices != null) {

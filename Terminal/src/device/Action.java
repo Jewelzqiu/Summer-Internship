@@ -20,17 +20,17 @@ public class Action {
 		this.output = output;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Hashtable<String, Object> getProps(String[] values) {
+	@SuppressWarnings("rawtypes")
+	public Hashtable<String, Object> getProps(Hashtable arguments) {
 		props = new Hashtable<String, Object>();
 		props.put("DEVICE_ID", device_id);
 		props.put("SERVICE_ID", service_id);
 		props.put("ACTION_NAME", name);
-		@SuppressWarnings("rawtypes")
-		Hashtable arguments = new Hashtable();
-		for (int i = 0; i < input.length; i++) {
-			arguments.put(input[i], values[i]);
-		}
+//		@SuppressWarnings("rawtypes")
+//		Hashtable arguments = new Hashtable();
+//		for (int i = 0; i < input.length; i++) {
+//			arguments.put(input[i], values[i]);
+//		}
 		props.put("ARGUMENTS", arguments);
 		return props;
 	}

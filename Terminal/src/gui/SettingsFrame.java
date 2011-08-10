@@ -97,7 +97,7 @@ public class SettingsFrame extends javax.swing.JFrame {
 				}
 			}
 			pack();
-			setSize(220, 120);
+			setSize(220, 140);
 			setLocationRelativeTo(null);
 		} catch (Exception e) {
 			e.printStackTrace();
