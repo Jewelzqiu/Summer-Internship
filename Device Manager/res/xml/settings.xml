@@ -7,6 +7,7 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="Start">
         <Preference android:title="Show Devices" android:key="StartPreference"></Preference>
+        <Preference android:key="startTypes" android:title="Show Services"></Preference>
     </PreferenceCategory>
     
 </PreferenceScreen>

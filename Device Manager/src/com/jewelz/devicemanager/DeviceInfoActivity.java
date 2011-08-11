@@ -1,7 +1,11 @@
 package com.jewelz.devicemanager;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Vector;
+
+import com.jewelz.devicemanager.device.Device;
+import com.jewelz.devicemanager.device.Service;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -11,14 +15,14 @@ import android.view.MenuItem;
 
 public class DeviceInfoActivity extends PreferenceActivity {
 
-	private Hashtable<String, Object> DeviceInfo;
-	static Hashtable<String, ArrayList<Object>> Services;
+	private Device DeviceInfo;
+	static Vector<Service> Services;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.deviceinfo);
-		DeviceInfo = DevicesActivity.getDeviceInfo();
+		addPreferencesFromResource(R.xml.details);
+		DeviceInfo = DevicesActivity.getDevice();
 		addDeviceInfo();
 	}
 
@@ -33,23 +37,19 @@ public class DeviceInfoActivity extends PreferenceActivity {
 		int id = item.getItemId();
 		if (id == 0) {
 			Intent intent = new Intent(DeviceInfoActivity.this, ServicesActivity.class);
+			intent.putExtra("FROM_MAIN", false);
 			startActivity(intent);
 		}
 		return true;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void addDeviceInfo() {		
-		for (String key : DeviceInfo.keySet()) {
-			if (key.equals("Device Services")) {
-				Services = (Hashtable<String, ArrayList<Object>>)
-						DeviceInfo.get("Device Services");
-				continue;
-			}
-			
+	private void addDeviceInfo() {
+		Services = DeviceInfo.getServices();
+		Hashtable<String, Object> info = DeviceInfo.getDeviceInfo();
+		for (String key : info.keySet()) {
 			Preference item = new Preference(this);
 			item.setTitle(key);
-			item.setSummary(DeviceInfo.get(key).toString());
+			item.setSummary(info.get(key).toString());
 			getPreferenceScreen().addPreference(item);
 		}
 	}

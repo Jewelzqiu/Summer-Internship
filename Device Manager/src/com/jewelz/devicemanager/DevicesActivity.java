@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import com.jewelz.devicemanager.device.Device;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -20,13 +22,13 @@ public class DevicesActivity extends PreferenceActivity {
 	private Socket socket;
 	private ObjectInputStream in;
 	private PrintWriter out;
-	private static ArrayList<Hashtable<String, Object>> Devices;
+	private static ArrayList<Device> Devices;
 	private static int device_id = -1;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.devices);
+		addPreferencesFromResource(R.xml.details);
 		
 		addDevices();
 	}
@@ -35,7 +37,7 @@ public class DevicesActivity extends PreferenceActivity {
 		Vector<Hashtable<String, Object>> devices = null;
 		try {
 			devices = getDevicesInfo();
-			Devices = new ArrayList<Hashtable<String, Object>>();
+			Devices = new ArrayList<Device>();
 			
 			if (devices != null) {
 				for (Hashtable<String, Object> device : devices) {
@@ -44,7 +46,7 @@ public class DevicesActivity extends PreferenceActivity {
 					deviceitem.setKey(Devices.size() + "");
 					deviceitem.setOnPreferenceClickListener(new OnDeviceClickListener());
 					getPreferenceScreen().addPreference(deviceitem);
-					Devices.add(device);
+					Devices.add(new Device(device));
 				}
 			}	
 			device_id = -1;
@@ -84,7 +86,7 @@ public class DevicesActivity extends PreferenceActivity {
 		return true;
 	}
 	
-	public static Hashtable<String, Object> getDeviceInfo() {
+	public static Device getDevice() {
 		if (device_id != -1) {
 			return Devices.get(device_id);
 		}

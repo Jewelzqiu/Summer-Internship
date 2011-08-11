@@ -1,6 +1,10 @@
 package com.jewelz.devicemanager;
 
-import java.util.ArrayList;
+import java.util.Vector;
+
+import com.jewelz.devicemanager.device.Action;
+import com.jewelz.devicemanager.device.Service;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -9,40 +13,62 @@ import android.preference.PreferenceActivity;
 
 public class ServicesActivity extends PreferenceActivity {
 
-	private static ArrayList<ArrayList<Object>> Services;
 	private static int service_id = -1;
+	private boolean FromMain;
+	private static Vector<Service> Services;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.services);
-		Services = new ArrayList<ArrayList<Object>>();
+		FromMain = this.getIntent().getBooleanExtra("FROM_MAIN", true);
+		addPreferencesFromResource(R.xml.details);
 		addServices();
 	}
 	
-	public static ArrayList<Object> getActions() {
+	public static Vector<Action> getActions() {
 		if (service_id != -1) {
-			return Services.get(service_id);
+			return Services.get(service_id).getActions();
 		}
 		return null;
 	}
 	
 	private void addServices() {
-		if (DeviceInfoActivity.Services == null) {
+		if (FromMain) {
+			
+			addAllServices();
+			
+		} else {
+			
+			if (DeviceInfoActivity.Services == null) {
+				return;
+			}
+			Services = DeviceInfoActivity.Services;
+			for (int i = 0; i < Services.size(); i++) {
+				Service service = Services.get(i);
+				Preference item = new Preference(this);
+				item.setTitle(service.getID());
+				item.setKey(Integer.toString(i));
+				item.setOnPreferenceClickListener(new OnServiceClickListener());
+				getPreferenceScreen().addPreference(item);
+			}
+		}	
+		
+		service_id = -1;
+	}
+	
+	private void addAllServices() {
+		Services = ServiceTypesActivity.getService();
+		if (Services == null) {
 			return;
 		}
 		
-		for (String key : DeviceInfoActivity.Services.keySet()) {
-			ArrayList<Object> service = DeviceInfoActivity.Services.get(key);
+		for (int i = 0; i < Services.size(); i++) {
 			Preference item = new Preference(this);
-			item.setTitle(key);
-			item.setKey(ServicesActivity.Services.size() + "");
+			item.setTitle(Services.get(i).getID());
+			item.setKey(Integer.toString(i));
 			item.setOnPreferenceClickListener(new OnServiceClickListener());
 			getPreferenceScreen().addPreference(item);
-			
-			ServicesActivity.Services.add(service);
 		}
-		service_id = -1;
 	}
 	
 	private class OnServiceClickListener implements OnPreferenceClickListener {

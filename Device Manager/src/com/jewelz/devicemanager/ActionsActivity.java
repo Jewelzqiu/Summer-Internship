@@ -1,6 +1,9 @@
 package com.jewelz.devicemanager;
 
-import java.util.ArrayList;
+import java.util.Vector;
+
+import com.jewelz.devicemanager.device.Action;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -9,39 +12,37 @@ import android.preference.PreferenceActivity;
 
 public class ActionsActivity extends PreferenceActivity {
 	
-	private static ArrayList<Object> Actions;
+	private static Vector<Action> Actions;
 	private static int action_id = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.actions);
+		addPreferencesFromResource(R.xml.details);
 		Actions = ServicesActivity.getActions();
 		addActions();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addActions() {
 		if (Actions == null) {
 			return;
 		}
 		
-		int flag = 0;		
-		for (Object o : Actions) {
-			ArrayList<Object> action = (ArrayList<Object>) o;
+		for (int i = 0; i < Actions.size(); i++) {
 			Preference item = new Preference(this);
-			item.setTitle(action.get(0).toString());
-			item.setKey(flag++ + "");
+			Action action = Actions.get(i);
+			item.setTitle(action.getName());
+			item.setKey(Integer.toString(i));
 			item.setOnPreferenceClickListener(new OnActionClickListener());
 			getPreferenceScreen().addPreference(item);
-		}		
+		}
+			
 		action_id = -1;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static ArrayList<Object> getAction() {
+	public static Action getAction() {
 		if (action_id != -1) {
-			return (ArrayList<Object>) Actions.get(action_id);
+			return Actions.get(action_id);
 		}
 		return null;
 	}

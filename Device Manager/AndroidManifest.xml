@@ -16,6 +16,7 @@
         
         <activity android:name="DevicesActivity" android:label="Devices" />
         <activity android:name="DeviceInfoActivity" android:label="Device information" />
+        <activity android:name="ServiceTypesActivity" android:label="Service Types" />
         <activity android:name="ServicesActivity" android:label="Device Services" />
         <activity android:name="ActionsActivity" android:label="Actions" />        
         <activity android:name="ActionInfoActivity" android:label="Action information" />

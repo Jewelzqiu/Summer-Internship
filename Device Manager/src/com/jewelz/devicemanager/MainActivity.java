@@ -24,6 +24,7 @@ public class MainActivity
 	private EditTextPreference IPText;
 	private EditTextPreference PortText;
 	private Preference start;
+	private Preference startT;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,9 @@ public class MainActivity
 		PortText.setSummary(Port);
 		
 		start = findPreference("StartPreference");
-		start.setOnPreferenceClickListener(new startListener());
+		start.setOnPreferenceClickListener(new StartListener());
+		startT = findPreference("startTypes");
+		startT.setOnPreferenceClickListener(new ShowTypesListener());
 		
 		getPreferenceManager().getSharedPreferences()
 				.registerOnSharedPreferenceChangeListener(this);	
@@ -75,7 +78,7 @@ public class MainActivity
 		}
 	}
 	
-	private class startListener implements OnPreferenceClickListener {
+	private class StartListener implements OnPreferenceClickListener {
 		@Override
 		public boolean onPreferenceClick(Preference preference) {
 			if (IP == null || IP.equals("") || port == 0) {
@@ -115,7 +118,53 @@ public class MainActivity
 			
 			Intent intent = new Intent(MainActivity.this, DevicesActivity.class);
 			startActivity(intent);
-			return false;
+			return true;
+		}
+		
+	}
+	
+	private class ShowTypesListener implements OnPreferenceClickListener {
+
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			if (IP == null || IP.equals("") || port == 0) {
+				new AlertDialog.Builder(MainActivity.this)
+				.setTitle("Warning")
+				.setMessage("Please set the valid IP address and the port number first.")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// close
+					}
+					
+				})
+				.show();
+				return false;
+			}
+			
+			ConnectivityManager cm = (ConnectivityManager) 
+					getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo netinfo = cm.getActiveNetworkInfo();
+			if (netinfo == null || !netinfo.isConnected()) {
+				new AlertDialog.Builder(MainActivity.this)
+				.setTitle("Warning")
+				.setMessage("Please check the network connection state.")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// close
+					}
+					
+				})
+				.show();
+				return false;
+			}
+			
+			Intent intent = new Intent(MainActivity.this, ServiceTypesActivity.class);
+			startActivity(intent);
+			return true;
 		}
 		
 	}
