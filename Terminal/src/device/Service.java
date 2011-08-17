@@ -20,11 +20,6 @@ public class Service {
 			Actions.add(new Action(device_id, service_id, action_info.get(0).toString(),
 					(String[]) action_info.get(1), (String[]) action_info.get(2)));
 		}
-//		for (Object o : actions) {
-//			ArrayList<Object> action_info = (ArrayList<Object>) o;
-//			Actions.add(new Action(device_id, service_id, action_info.get(0).toString(),
-//					(String[]) action_info.get(1), (String[]) action_info.get(2)));
-//		}
 	}
 	
 	public String getID() {

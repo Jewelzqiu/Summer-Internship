@@ -44,7 +44,7 @@ public class ServicePanel extends javax.swing.JPanel {
 	
 	private void initGUI(Vector<Service> services) {
 		try {
-			setPreferredSize(new Dimension(400, 300));
+			setPreferredSize(new Dimension(420, 300));
 			BoxLayout thisLayout = new BoxLayout(this, javax.swing.BoxLayout.Y_AXIS);
 			this.setLayout(thisLayout);
 			{

@@ -12,12 +12,17 @@ import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTabbedPane;
-
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import org.jdesktop.application.SingleFrameApplication;
 
 import device.Device;
@@ -48,11 +53,13 @@ public class TerminalApplication extends SingleFrameApplication {
     private JButton ServicesButton;
     private JButton RefreshButton;
     private JButton SettingsButton;
-    private JTabbedPane InfoTabbedPane;
     private JRadioButton ServiceRadioButton;
     private JPanel LeftPanel;
 	private String IP;
 	private int port;
+	private JScrollPane DetailsPane;
+	private JComboBox ComboBox;
+	private JPanel InfoPanel;
 	private Vector<Device> Devices;
 	private Hashtable<String, Vector<Service>> Services;
 
@@ -62,9 +69,9 @@ public class TerminalApplication extends SingleFrameApplication {
     		topPanel = new JPanel();
     		getMainFrame().getContentPane().add(topPanel, BorderLayout.NORTH);
     		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-    		topPanel.setPreferredSize(new java.awt.Dimension(500, 320));
+    		topPanel.setPreferredSize(new java.awt.Dimension(600, 360));
     		topPanel.add(getLeftPanel());
-    		topPanel.add(getInfoTabbedPane());
+    		topPanel.add(getInfoPanel());
     	}
         show(topPanel);
         checkConfig();
@@ -93,7 +100,7 @@ public class TerminalApplication extends SingleFrameApplication {
     		LeftPanel.add(getRefreshButton());
     		LeftPanel.add(getServicesButton());
     		getButtonGroup();
-    		LeftPanel.setPreferredSize(new java.awt.Dimension(100, 320));
+    		LeftPanel.setPreferredSize(new java.awt.Dimension(100, 336));
     		LeftPanel.setLayout(null);
     	}
     	return LeftPanel;
@@ -117,14 +124,6 @@ public class TerminalApplication extends SingleFrameApplication {
     		ServiceRadioButton.addActionListener(new ServiceSelectedListener());
     	}
     	return ServiceRadioButton;
-    }
-    
-    private JTabbedPane getInfoTabbedPane() {
-    	if(InfoTabbedPane == null) {
-    		InfoTabbedPane = new JTabbedPane();
-    		InfoTabbedPane.setPreferredSize(new java.awt.Dimension(400, 320));
-    	}
-    	return InfoTabbedPane;
     }
     
     private JButton getSettingsButton() {
@@ -161,10 +160,30 @@ public class TerminalApplication extends SingleFrameApplication {
     	if (Devices == null || Devices.isEmpty()) {
     		return;
     	}
-    	for (Device device : Devices) {
+    	String[] names = new String[Devices.size()];
+    	for (int i = 0; i < Devices.size(); i++) {
+    		names[i] = Devices.get(i).getName();
+    	}
+		ComboBoxModel ComboBoxModel = new DefaultComboBoxModel(names);
+    	ComboBox.setModel(ComboBoxModel);
+    	
+    	Device device = Devices.get(0);
+    	if (device != null) {
     		Hashtable<String, Object> info = device.getDeviceInfo();
-        	InfoTabbedPane.addTab(info.get("UPnP.device.modelName").toString(),
-        			new DevicePanel(info));
+				int n = info.size();
+				String[][] data = new String[n][2];
+				int flag = 0;
+				for (String key : info.keySet()) {
+					data[flag][0] = key;
+					data[flag++][1] = info.get(key).toString();
+				}
+				TableModel InfoTableModel = 
+						new DefaultTableModel(
+								data, new String[] { "Attribute", "Value" }
+						);
+				JTable infotable = new JTable();
+				DetailsPane.setViewportView(infotable);
+				infotable.setModel(InfoTableModel);
     	}
     }
     
@@ -172,9 +191,17 @@ public class TerminalApplication extends SingleFrameApplication {
     	if (Services == null || Services.isEmpty()) {
     		return;
     	}
+    	String[] types = new String[Services.size()];
+    	int flag = 0;
     	for (String type : Services.keySet()) {
-    		Vector<Service> services = Services.get(type);
-    		InfoTabbedPane.addTab(type, new ServicePanel(services));
+    		types[flag++] = type;
+    	}
+    	ComboBoxModel ComboBoxModel = new DefaultComboBoxModel(types);
+    	ComboBox.setModel(ComboBoxModel);
+    	
+    	if (types.length > 0) {
+    		Vector<Service> services = Services.get(types[0]);
+    		DetailsPane.setViewportView(new ServicePanel(services));
     	}
     }
     
@@ -184,7 +211,6 @@ public class TerminalApplication extends SingleFrameApplication {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
 				ServicesButton.setEnabled(true);
-				InfoTabbedPane.removeAll();
 				new Refresh().start();
 				addDevices();
 			} catch (Exception e) {
@@ -200,7 +226,6 @@ public class TerminalApplication extends SingleFrameApplication {
 		public void actionPerformed(ActionEvent e) {
 			try {
 				ServicesButton.setEnabled(false);
-				InfoTabbedPane.removeAll();
 				new Refresh().start();
 				addServices();
 			} catch (Exception exp) {
@@ -224,8 +249,7 @@ public class TerminalApplication extends SingleFrameApplication {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			try {				
-				InfoTabbedPane.removeAll();
+			try {
 				Refresh refresh = new Refresh();
 				refresh.start();
 				if (DeviceRadioButton.isSelected()) {
@@ -244,7 +268,7 @@ public class TerminalApplication extends SingleFrameApplication {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			int i = InfoTabbedPane.getSelectedIndex();
+			int i = ComboBox.getSelectedIndex();
 			new ServicesFrame(Devices.get(i).getServices()).setVisible(true);
 		}
 		
@@ -263,6 +287,64 @@ public class TerminalApplication extends SingleFrameApplication {
 		}
 	}
 	
+	private JPanel getInfoPanel() {
+		if(InfoPanel == null) {
+			InfoPanel = new JPanel();
+			InfoPanel.setPreferredSize(new java.awt.Dimension(495, 336));
+			InfoPanel.setLayout(null);
+			InfoPanel.add(getComboBox());
+			InfoPanel.add(getDetailsPane());
+		}
+		return InfoPanel;
+	}
+	
+	private JComboBox getComboBox() {
+		if(ComboBox == null) {
+			ComboBox = new JComboBox();
+			ComboBox.setBounds(10, 10, 476, 21);
+			ComboBox.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if (DeviceRadioButton.isSelected()) {
+						int index = ((JComboBox) arg0.getSource()).getSelectedIndex();
+						Hashtable<String, Object> info = 
+							Devices.get(index).getDeviceInfo();
+						int n = info.size();
+						String[][] data = new String[n][2];
+						int flag = 0;
+						for (String key : info.keySet()) {
+							data[flag][0] = key;
+							data[flag++][1] = info.get(key).toString();
+						}
+						TableModel InfoTableModel = 
+								new DefaultTableModel(
+										data, new String[] { "Attribute", "Value" }
+								);
+						JTable infotable = new JTable();
+						DetailsPane.setViewportView(infotable);
+						infotable.setModel(InfoTableModel);
+						
+					} else if (ServiceRadioButton.isSelected()) {
+						String type = ((JComboBox) arg0.getSource())
+								.getSelectedItem().toString();
+						Vector<Service> services = Services.get(type);
+						DetailsPane.setViewportView(new ServicePanel(services));
+					}
+				}
+			});
+		}
+		return ComboBox;
+	}
+	
+	private JScrollPane getDetailsPane() {
+		if(DetailsPane == null) {
+			DetailsPane = new JScrollPane();
+			DetailsPane.setBounds(10, 41, 476, 310);
+		}
+		return DetailsPane;
+	}
+
 	private class Refresh extends Thread {
 		public void run() {
 			
