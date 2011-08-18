@@ -116,6 +116,8 @@ public class ActionInfoFrame extends javax.swing.JFrame {
 						texti.setEditable(false);
 						getContentPane().add(outputi);
 						getContentPane().add(texti);
+						outputnames.add(outputi);
+						outputvalues.add(texti);
 					}
 				}
 			}
@@ -152,7 +154,7 @@ public class ActionInfoFrame extends javax.swing.JFrame {
 						if (returns != null) {
 							for (int i = 0; i < outputnames.size(); i++) {
 								String name = outputnames.get(i).getText();
-								String value = (String) returns.get(name);
+								String value = returns.get(name).toString();
 								outputvalues.get(i).setText(value);
 							}
 						}

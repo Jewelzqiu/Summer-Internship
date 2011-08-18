@@ -20,6 +20,7 @@ public class UPnPPrinterDevice implements UPnPDevice {
 	  
 	UPnPStateVariable sv_Printing;
 	UPnPStateVariable sv_PrintMessage;
+	UPnPStateVariable sv_Output;
 	PrintAction ac_Print;
 	PrinterService srv_Printer;
 
@@ -37,7 +38,7 @@ public class UPnPPrinterDevice implements UPnPDevice {
 		props.put(UPnPDevice.DEVICE_CATEGORY, 
 				new String[]{UPnPDevice.DEVICE_CATEGORY});
 		props.put(UPnPDevice.UDN, "uuid:PrinterType-" + getLocalHostname());    
-		props.put(UPnPDevice.TYPE, "urn:schemas-prosyst-com:device:UPnPPrinterType:1");
+		props.put(UPnPDevice.TYPE, "urn:schemas-prosyst-com:device:UPnPPrinterType:3");
 		props.put(UPnPDevice.FRIENDLY_NAME, "UPnPPrinter");
 		props.put(UPnPDevice.MANUFACTURER, "ProSyst Software AG");
 		props.put(UPnPDevice.MANUFACTURER_URL, "http://www.prosyst.com");
@@ -59,14 +60,17 @@ public class UPnPPrinterDevice implements UPnPDevice {
 		sv_PrintMessage =
 				new StateVarImpl("PrintMessage", String.class, 
 						UPnPStateVariable.TYPE_STRING, "", false);
+		sv_Output = new StateVarImpl("Output", String.class,
+				UPnPStateVariable.TYPE_STRING, "", false);
 		      
-		upnpStateVars = new UPnPStateVariable[] {sv_Printing, sv_PrintMessage};
+		upnpStateVars = new UPnPStateVariable[] {sv_Printing, sv_PrintMessage, sv_Output};
 		    
 		// init action Print
 		Hashtable nameVar = new Hashtable(2);
 		nameVar.put(sv_PrintMessage.getName(), sv_PrintMessage);
 
 		ac_Print = new PrintAction(new String[]{sv_PrintMessage.getName()},
+				new String[]{sv_Output.getName()},
 				nameVar, this);
 		upnpActions = new UPnPAction[] {ac_Print};
 

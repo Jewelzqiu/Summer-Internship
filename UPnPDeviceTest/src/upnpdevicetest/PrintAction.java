@@ -12,11 +12,13 @@ public class PrintAction implements UPnPAction {
 	UPnPPrinterDevice dev;
 	String name = "print";
 	String[] iaNames;
+	String[] oaNames;
 	Hashtable argSSV;
 	         
-	public PrintAction(String[] iaNames, Hashtable argSSV, 
+	public PrintAction(String[] iaNames, String[] oaNames, Hashtable argSSV, 
 			UPnPPrinterDevice dev) {
 		this.iaNames = iaNames;
+		this.oaNames = oaNames;
 		this.argSSV = argSSV;
 		this.dev = dev;
 	}
@@ -34,7 +36,7 @@ public class PrintAction implements UPnPAction {
 	}
 
 	public String[] getOutputArgumentNames() {
-		return null;
+		return oaNames;
 	}
 
 	public UPnPStateVariable getStateVariable(String argumentName) {
@@ -43,6 +45,7 @@ public class PrintAction implements UPnPAction {
 
 	public Dictionary invoke(Dictionary d) throws Exception {
 		String msg = (String) d.get(iaNames[0]);
+		Hashtable outputs = new Hashtable();
 	    if (msg != null) {
 	    	// send printing=true event
 	    	Hashtable events = new Hashtable(2);
@@ -58,8 +61,10 @@ public class PrintAction implements UPnPAction {
 	    	// send printing=false event
 	    	events.put(dev.sv_Printing.getName(), Boolean.FALSE);
 	    	dev.srv_Printer.generateEvent(events);
+	    	
+	    	outputs.put(oaNames[0], "out " + msg);
 	    }
-		return null;
+		return outputs;
 	}
 
 }
