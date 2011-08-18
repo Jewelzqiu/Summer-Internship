@@ -23,6 +23,7 @@ public class Device {
 		props.remove("objectClass");
 		props.remove("UPnP");
 		props.remove("UPNP_SERVICE_ID");
+		props.remove("UPNP_SERVICE_TYPE");
 	}
 	
 	public Vector<Service> getServices() {
